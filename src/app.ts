@@ -12,12 +12,6 @@ export const app = new App({
     port: 3000
 });
 
-app.use(async ({ next }) => {
-    // TODO: This can be improved in future versions
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    await next!();
-});
-
 registerListeners(app);
 
 
