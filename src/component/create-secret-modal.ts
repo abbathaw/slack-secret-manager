@@ -4,15 +4,29 @@ import {SlashCommand} from "@slack/bolt/dist/types/command";
 
 interface CreateSecretModalInterface {
     client: WebClient;
-    body: any;
     command: SlashCommand;
 }
 
-const showCreateSecretModal = async ({ command, client, body }: CreateSecretModalInterface) => {
+// what is command {
+//     token: 'I63ybtmf7M8XbnkJQX5j8QhO',
+//         team_id: 'T02V94KTNEL',
+//         team_domain: 'abba-dev',
+//         channel_id: 'C02V94KV1PS',
+//         channel_name: 'random',
+//         user_id: 'U02UGEW65UM',
+//         user_name: 'aalthawr',
+//         command: '/secret',
+//         text: '',
+//         api_app_id: 'A02V5S0RKBL',
+//         is_enterprise_install: 'false',
+//         response_url: 'https://hooks.slack.com/commands/T02V94KTNEL/3006425340097/p9hviQ8Jl1zZznsJJ0u8QVum',
+//         trigger_id: '2987109019814.2995155940496.a12e53280e62f60c8eab5b3d777094f1'
+// }
+
+const showCreateSecretModal = async ({ command, client }: CreateSecretModalInterface) => {
     const result = await client.views.open({
         // Pass a valid trigger_id within 3 seconds of receiving it
-        // @ts-ignore // TODO check if this is correct
-        trigger_id: body.trigger_id,
+        trigger_id: command.trigger_id,
         // View payload
         view: {
             type: 'modal',
@@ -24,12 +38,13 @@ const showCreateSecretModal = async ({ command, client, body }: CreateSecretModa
             }),
             title: {
                 type: 'plain_text',
-                text: 'Share Secret'
+                text: 'Share Secret',
+
             },
             blocks: [
                 {
                     type: 'input',
-                    optional: true,
+                    optional: false,
                     element: {
                         type: 'plain_text_input',
                         action_id: 'action-title'
@@ -42,7 +57,7 @@ const showCreateSecretModal = async ({ command, client, body }: CreateSecretModa
                 },
                 {
                     type: 'input',
-                    optional: true,
+                    optional: false,
                     element: {
                         type: 'plain_text_input',
                         multiline: true,
@@ -123,6 +138,21 @@ const showCreateSecretModal = async ({ command, client, body }: CreateSecretModa
                     }
                 },
                 {
+                    "block_id": "my_block_id",
+                    "type": "input",
+                    "optional": true,
+                    "label": {
+                        "type": "plain_text",
+                        "text": "Where would you like to share it",
+                    },
+                    "element": {
+                        "action_id": "action-conversations",
+                        "type": "conversations_select",
+                        "response_url_enabled": true,
+                        "default_to_current_conversation": true,
+                    },
+                },
+                {
                     type: 'section',
                     text: {
                         type: 'mrkdwn',
@@ -141,7 +171,7 @@ const showCreateSecretModal = async ({ command, client, body }: CreateSecretModa
                         ],
                         action_id: 'action-visible'
                     }
-                }
+                },
             ],
             submit: {
                 type: 'plain_text',

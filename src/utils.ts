@@ -17,6 +17,8 @@ function getStateValue(values: ValuesType, name: string) {
         case 'multi_users_select': return value.selected_users;
         case 'static_select': return value.selected_option;
         case 'checkboxes': return value.selected_options;
+        case 'conversations_select': return value.selected_conversation;
+        case 'multi_conversations_select': return value.selected_conversations;
         default: return null;
     }
 }

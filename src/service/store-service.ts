@@ -33,11 +33,12 @@ interface ICreateSecret {
     title: any;
     encrypted: any;
     users: any;
-    expiry: any;
+    expiry?: any;
     onetime: boolean;
+    conversation?: any;
 }
 
-async function createSecret({ channelId, title, encrypted, users, expiry, onetime }: ICreateSecret) {
+async function createSecret({ channelId, title, encrypted, users, expiry, onetime, conversation }: ICreateSecret) {
     const uuid = uuidv4();
     try {
         await docClient.put({
@@ -48,7 +49,7 @@ async function createSecret({ channelId, title, encrypted, users, expiry, onetim
                 title,
                 createdAt: new Date().toISOString(),
                 rule: {
-                    users, expiry, onetime,
+                    users, expiry, onetime, conversation
                 },
             }
         }).promise();

@@ -11,8 +11,9 @@ const register = (app: App)=> {
         try {
             if (command.text === "")
                 await showCreateSecretModal(context);
-            else
+            else {
                 await respond(`${JSON.stringify(command, null, 2)}`);
+            }
             logger.info('secret command:', pick(command, ['response_url', 'trigger_id']));
         }
         catch (error) {

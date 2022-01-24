@@ -23,7 +23,6 @@ async function decryptMessage(data: any, decodeKey: string) {
         message: await openpgp.readMessage({ armoredMessage: data }),
         passwords: [decodeKey],
     });
-
     return decrypted;
 }
 
