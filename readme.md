@@ -16,7 +16,7 @@ Getting Started
 - **Event Subscriptions** add in the *Request URL* (IF not using socket mode)
     + Eg. `https://XXXXXX.ngrok.io/slack/events`
     + Make sure is verified.
-- In the app config, add the necessary commands and permissions (for write), and events listeners
+- In the app config, add the necessary commands and permissions (for write), and events listeners (refer to manifest.yaml)
 - If everything works well, type `/secret` in the slack chat.
     + It should have a pop up model.
 

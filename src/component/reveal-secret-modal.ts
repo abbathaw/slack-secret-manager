@@ -41,7 +41,7 @@ const revealSecretModal = async ({ client, body, store, message }: RevealSecretM
                     elements: [
                         {
                             type: 'plain_text',
-                            text: `This message will expired on ${expiredTime.toDateString()}.`,
+                            text: `This message will expire on ${expiredTime.toDateString()}.`,
                             emoji: true
                         }
                     ]

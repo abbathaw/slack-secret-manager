@@ -1,19 +1,19 @@
 const axios = require('axios');
 
 interface DisplaySecretModalInterface {
-    body: any;
     store: any;
     decodeKey: string;
-    title: any;
+    title?: any;
     responseUrl: string;
+    author: any;
 }
 
-const displaySecretModal = async ({ body, store, decodeKey, title, responseUrl }: DisplaySecretModalInterface) => {
-    const user = body['user']['id'];
+const displaySecretModal = async ({ store, decodeKey, title, responseUrl, author }: DisplaySecretModalInterface) => {
 
+    console.log("WHO USER", author)
     const result = await axios.post(responseUrl, {
         response_type: 'in_channel',
-        blocks: getBlocks(decodeKey, store, title, user)
+        blocks: getBlocks(decodeKey, store, title, author)
     });
 
     return result;
@@ -25,7 +25,7 @@ const getBlocks = (decodeKey: string, store: any, title: string | undefined, use
             type: 'section',
             text: {
                 type: 'mrkdwn',
-                text: `<@${user}> share a secret *${title || '<Untitled Secret>'}*`,
+                text: `<@${user}> shared a secret *${title || '<Untitled Secret>'}*`,
             }
         },
         {

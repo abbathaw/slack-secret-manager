@@ -54,7 +54,8 @@ const register = (app: App)=> {
             if (response_urls && response_urls.length > 0) {
                 responseUrl = response_urls[0].response_url;
             }
-            await displaySecretModal(Object.assign({store, decodeKey, responseUrl}, value, context));
+            const author = body['user']['id'];
+            await displaySecretModal(Object.assign({store, decodeKey, responseUrl, author}, value, context));
 
         } catch(e){
             console.log("Error occured", e)
