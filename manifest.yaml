@@ -18,7 +18,7 @@ features:
   slash_commands:
     - command: /secret
       description: Share a secret
-      should_escape: false
+      should_escape: true
 oauth_config:
   scopes:
     bot:

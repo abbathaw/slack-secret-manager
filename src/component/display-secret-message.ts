@@ -9,15 +9,13 @@ interface DisplaySecretModalInterface {
 }
 
 const displaySecretModal = async ({ store, decodeKey, title, responseUrl, author }: DisplaySecretModalInterface) => {
-
-    console.log("WHO USER", author)
     const result = await axios.post(responseUrl, {
         response_type: 'in_channel',
-        blocks: getBlocks(decodeKey, store, title, author)
+        blocks: getBlocks(decodeKey, store, title, author),
     });
 
     return result;
-}
+};
 
 const getBlocks = (decodeKey: string, store: any, title: string | undefined, user: any) => {
     return [
@@ -26,7 +24,7 @@ const getBlocks = (decodeKey: string, store: any, title: string | undefined, use
             text: {
                 type: 'mrkdwn',
                 text: `<@${user}> shared a secret *${title || '<Untitled Secret>'}*`,
-            }
+            },
         },
         {
             type: 'actions',
@@ -36,7 +34,7 @@ const getBlocks = (decodeKey: string, store: any, title: string | undefined, use
                     type: 'button',
                     text: {
                         type: 'plain_text',
-                        text: 'Reveal Secret'
+                        text: 'Reveal Secret',
                     },
                     value: `${store.uuid}:${decodeKey}`,
                     action_id: 'button-reveal',
@@ -49,10 +47,10 @@ const getBlocks = (decodeKey: string, store: any, title: string | undefined, use
                     },
                     value: `${store.uuid}`,
                     action_id: 'button-access-log',
-                }
-            ]
-        }
-    ]
-}
+                },
+            ],
+        },
+    ];
+};
 
-export {displaySecretModal}
+export { displaySecretModal };

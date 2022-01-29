@@ -47,7 +47,6 @@ function isValidExpiry(expiry: number) {
 }
 
 const getExpiry = (expiryValue?: ViewStateSelectedOption): number => {
-    console.log('WHAT IS EXPIRY', expiryValue);
     if (expiryValue && expiryValue.value !== undefined) {
         try {
             return parseInt(expiryValue.value);

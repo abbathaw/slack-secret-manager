@@ -31,7 +31,7 @@ const register = (app: App) => {
                 title: utils.getStateValue(modalValue, 'action-title'),
                 message: utils.getStateValue(modalValue, 'action-message'),
                 users: utils.getStateValue(modalValue, 'action-user'),
-                conversation: utils.getStateValue(modalValue, 'action-conversations'),
+                conversation: utils.getStateValue(modalValue, 'action-conversations') as string,
                 expiry: getExpiry(utils.getStateValue(modalValue, 'action-expiry') as ViewStateSelectedOption),
                 onetime: getIfOneTime(utils.getStateValue(modalValue, 'action-visible') as ViewStateSelectedOption[]),
             };
@@ -43,6 +43,7 @@ const register = (app: App) => {
             const store = await storeService.createSecret({
                 encrypted,
                 ...value,
+                channelId: value.conversation,
                 authorId,
                 workspaceId: payload.team_id,
             });

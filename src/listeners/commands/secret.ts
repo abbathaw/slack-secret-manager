@@ -17,39 +17,29 @@ const register = (app: App) => {
                 const decodeKey = encryptionService.generateRandomKey();
                 const value = await getSecretWithoutModal(context);
 
-                if (value.user) {
-                    const usersList = await client.users.list({ team_id: command.team_id });
-                    const targetUser = usersList.members?.filter((user) => user.name === value.user.substring(1));
+                if (value.isValid) {
                     const author = command.user_name;
-                    if (!targetUser || targetUser.length === 0) {
+                    const encrypted = await encryptionService.encryptMessage(value.message, decodeKey);
+                    const users = value.user;
+
+                    const store = await storeService.createSecret({
+                        encrypted,
+                        users,
+                        conversation: value.channelId,
+                        ...value,
+                        authorId: command.user_id,
+                        workspaceId: body.team_id,
+                    });
+                    if (!store) {
                         await respond({
                             response_type: 'ephemeral',
-                            text: `User ${value.user} couldn't be found. Consider creating the secret using the modal by typing /secret only.`,
+                            text: `Something happened while saving the secret. Please try again.`,
                             replace_original: false,
                         });
-                    } else {
-                        const encrypted = await encryptionService.encryptMessage(value.message, decodeKey);
-                        const users = [targetUser[0].id];
-                        const store = await storeService.createSecret({
-                            encrypted,
-                            users,
-                            ...value,
-                            authorId: author,
-                            workspaceId: body.team_id,
-                        });
-                        if (!store) {
-                            await respond({
-                                response_type: 'ephemeral',
-                                text: `Something happened while saving the secret. Please try again.`,
-                                replace_original: false,
-                            });
-                        }
-                        const responseUrl = command.response_url;
-
-                        await displaySecretModal(
-                            Object.assign({ store, decodeKey, responseUrl, author }, value, context),
-                        );
                     }
+                    const responseUrl = command.response_url;
+
+                    await displaySecretModal(Object.assign({ store, decodeKey, responseUrl, author }, value, context));
                 } else {
                     await respond({
                         response_type: 'ephemeral',
