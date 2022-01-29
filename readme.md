@@ -23,16 +23,20 @@ Getting Started
 Local DynamoDB Setup
 ====================
 - Setup the local dynamodb using `:8000` using the following [guide](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html)
-- Run `node createDynamoTable.js` to init create the table.
 - Ensure that you have the *Access Key* available in
     - Environment variable for `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`
     - Or, `AWS_CONFIG`.
 
 - Run local dynamodb
-```bash
-docker run -itd -p 8000:8000  --name dev-db amazon/dynamodb-local:latest -jar DynamoDBLocal.jar -sharedDb
-```
+  ```bash
+  docker run -itd -p 8000:8000  --name dev-db amazon/dynamodb-local:latest -jar DynamoDBLocal.jar -sharedDb
+  ```
+- Run `npm run db` to init create the tables.
 
+- Enable time-to-live on local db
+  ```bash
+  aws dynamodb update-time-to-live --table-name Secret --time-to-live-specification Enabled=true,AttributeName=ttl --endpoint-url http://localhost:8000 --region=sas
+  ```
 
 Bolt app template
 =================

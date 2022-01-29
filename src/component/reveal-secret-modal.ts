@@ -1,17 +1,22 @@
 import { WebClient } from '@slack/web-api/dist/WebClient';
-
+import { SecretRetrievedType } from '../service/store-service';
+import { Message } from '../models';
 
 interface RevealSecretModalInterface {
     client: WebClient;
     body: any;
-    store: any;
-    message: string;
+    store: SecretRetrievedType;
+    messageContent: string;
 }
 
-const revealSecretModal = async ({ client, body, store, message }: RevealSecretModalInterface) => {
-    const { createdAt, expiry = 0 } = store;
-    const expiredTime = new Date(createdAt.getTime());
-    expiredTime.setSeconds(expiredTime.getSeconds() + expiry);
+const revealSecretModal = async ({ client, body, store, messageContent }: RevealSecretModalInterface) => {
+    const { message } = store;
+    const expiryValue = message ? message.expiry : null;
+    let toExpireIn = '';
+    if (expiryValue) {
+        const expiredTime = new Date(expiryValue * 1000);
+        toExpireIn = `This message will expire on ${expiredTime.toDateString()}.`;
+    }
     const result = await client.views.open({
         // Pass a valid trigger_id within 3 seconds of receiving it
         trigger_id: body.trigger_id,
@@ -21,35 +26,35 @@ const revealSecretModal = async ({ client, body, store, message }: RevealSecretM
             title: {
                 type: 'plain_text',
                 text: 'Secret Title',
-                emoji: true
+                emoji: true,
             },
             close: {
                 type: 'plain_text',
                 text: 'Close',
-                emoji: true
+                emoji: true,
             },
             blocks: [
                 {
                     type: 'section',
                     text: {
                         type: 'mrkdwn',
-                        text: '*Message*\n```' + message + '```',
-                    }
+                        text: '*Message*\n```' + messageContent + '```',
+                    },
                 },
                 {
                     type: 'context',
                     elements: [
                         {
                             type: 'plain_text',
-                            text: `This message will expire on ${expiredTime.toDateString()}.`,
-                            emoji: true
-                        }
-                    ]
-                }
-            ]
-        }
+                            text: toExpireIn,
+                            emoji: true,
+                        },
+                    ],
+                },
+            ],
+        },
     });
     return result;
-}
+};
 
-export {revealSecretModal};
+export { revealSecretModal };

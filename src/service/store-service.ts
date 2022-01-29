@@ -1,25 +1,6 @@
-const tempSecret = {};
-const tempAccess = {};
+import { AccessLog, Message, Secret } from '../models';
+import { calculateTTL } from '../utils';
 
-/***
- * secret schema
- * {
- *   uuid, channelId, title, createdAt,
- *   rule {
- *     users, expiry, onetime,
- *   }
- * }
- *
- * message schema - This should be delete base on the TTL
- * {
- *   uuid, encrypted
- * }
- *
- * access schema
- * {
- *   uuid, secretUuid, userId, valid, createdAt,
- * }
- */
 const { v4: uuidv4 } = require('uuid');
 const AWS = require('aws-sdk');
 AWS.config.update({
@@ -29,104 +10,146 @@ AWS.config.update({
 const docClient = new AWS.DynamoDB.DocumentClient();
 
 interface ICreateSecret {
+    workspaceId: string;
+    authorId: string;
     channelId?: string;
     title: any;
     encrypted: any;
     users: any;
-    expiry?: any;
+    expiry: number;
     onetime: boolean;
     conversation?: any;
 }
 
-async function createSecret({ channelId, title, encrypted, users, expiry, onetime, conversation }: ICreateSecret) {
-    const uuid = uuidv4();
+async function createSecret({
+    workspaceId,
+    authorId,
+    channelId,
+    title,
+    encrypted,
+    users,
+    expiry,
+    onetime,
+    conversation,
+}: ICreateSecret) {
     try {
-        await docClient.put({
-            TableName: 'Secret',
-            Item: {
-                uuid,
-                channelId,
-                title,
-                createdAt: new Date().toISOString(),
-                rule: {
-                    users, expiry, onetime, conversation
-                },
-            }
-        }).promise();
+        const uuid = uuidv4();
+        const expiryEpoch = calculateTTL(expiry);
+        const messageItem: Message = {
+            workspaceId,
+            uuid,
+            channelId,
+            title,
+            authorId,
+            users,
+            expiry: expiryEpoch,
+            onetime,
+            conversation,
+            createdAt: new Date().toISOString(),
+        };
 
-        await docClient.put({
-            TableName: 'Message',
-            Item: {
-                uuid,
-                encrypted,
-            },
-        }).promise();
+        const secretItem: Secret = {
+            uuid,
+            encrypted,
+            ttl: expiryEpoch.toString(),
+        };
+
+        await docClient
+            .put({
+                TableName: 'Secret',
+                Item: secretItem,
+            })
+            .promise();
+
+        await docClient
+            .put({
+                TableName: 'Message',
+                Item: messageItem,
+            })
+            .promise();
+        return { uuid };
     } catch (err) {
         console.error(err);
+        return undefined;
     }
-
-    return { uuid };
 }
 
-async function retrieveSecret(uuid: string) {
-    const secret = await docClient.get({
-        TableName: 'Secret',
-        Key: { uuid },
-    }).promise();
+export type SecretRetrievedType = {
+    secret: Secret | undefined;
+    message: Message | undefined;
+    createdAt: Date;
+};
 
-    const message = await docClient.get({
-        TableName: 'Message',
-        Key: { uuid },
-    }).promise();
+async function retrieveSecret(uuid: string, workspaceId: string): Promise<SecretRetrievedType> {
+    const secret = await docClient
+        .get({
+            TableName: 'Secret',
+            Key: { uuid },
+        })
+        .promise();
 
-    return Object.assign({
+    const message = await docClient
+        .get({
+            TableName: 'Message',
+            Key: { uuid, workspaceId },
+        })
+        .promise();
+
+    const results: SecretRetrievedType = {
         createdAt: new Date(secret.Item.createdAt),
-    }, secret.Item.rule, message.Item);
-}
+        secret: (secret && secret.Item) || undefined,
+        message: (secret && message.Item) || undefined,
+    };
 
+    return results;
+}
 
 interface ICreateAuditTrail {
     uuid: string;
     userId: string;
-    valid?: boolean
+    valid?: boolean;
 }
 
 async function createAuditTrail({ uuid: secretUuid, userId, valid = true }: ICreateAuditTrail) {
     const uuid = uuidv4();
-    await docClient.put({
-        TableName: 'Access',
-        Item: {
-            uuid,
-            secretUuid,
-            userId,
-            valid,
-            createdAt: new Date().toISOString(),
-        },
-    }).promise();
+
+    const auditItem: AccessLog = {
+        uuid,
+        secretUuid,
+        userId,
+        valid,
+        createdAt: new Date().toISOString(),
+    };
+
+    await docClient
+        .put({
+            TableName: 'Access',
+            Item: auditItem,
+        })
+        .promise();
     return {};
 }
 
 async function retrieveAuditTrail(uuid: string) {
     const params = {
         TableName: 'Access',
-        FilterExpression: 'secretUuid = :s',
-        ExpressionAttributeValues: {
-            ':s': uuid,
-        }
+        IndexName: 'secretIdIndex',
+        KeyConditionExpression: 'secretUuid = :s',
+        ExpressionAttributeValues: { ':s': uuid },
     };
-    const data = await docClient.scan(params).promise();
+    const data = await docClient.query(params).promise();
     const Items = data.Items;
-    return Items;
+    return Items as AccessLog[];
 }
 
 async function deleteMessage(uuid: string) {
-    return {};
+    const params = {
+        TableName: 'Secret',
+        Key: {
+            uuid: uuid,
+        },
+    };
+    return await docClient.delete(params).promise();
 }
 
-export {
-    createSecret,
-    retrieveSecret,
-    createAuditTrail,
-    retrieveAuditTrail,
-    deleteMessage,
-};
+export { createSecret, retrieveSecret, createAuditTrail, retrieveAuditTrail, deleteMessage };
