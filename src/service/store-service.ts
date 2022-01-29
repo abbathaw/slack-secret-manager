@@ -96,7 +96,7 @@ async function retrieveSecret(uuid: string, workspaceId: string): Promise<Secret
         .promise();
 
     const results: SecretRetrievedType = {
-        createdAt: new Date(secret.Item.createdAt),
+        createdAt: new Date(message.Item.createdAt),
         secret: (secret && secret.Item) || undefined,
         message: (secret && message.Item) || undefined,
     };
