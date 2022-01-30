@@ -18,6 +18,10 @@ features:
   slash_commands:
     - command: /secret
       description: Share a secret
+      usage_hint: "@user secret"
+      should_escape: true
+    - command: /vault
+      description: Lists shared secrets here
       should_escape: true
 oauth_config:
   scopes:

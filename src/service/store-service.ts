@@ -96,7 +96,7 @@ async function retrieveSecret(uuid: string, workspaceId: string): Promise<Secret
         .promise();
 
     const results: SecretRetrievedType = {
-        createdAt: new Date(message.Item.createdAt),
+        createdAt: new Date(message.Item?.createdAt),
         secret: (secret && secret.Item) || undefined,
         message: (secret && message.Item) || undefined,
     };
@@ -152,4 +152,16 @@ async function deleteMessage(uuid: string) {
     return await docClient.delete(params).promise();
 }
 
-export { createSecret, retrieveSecret, createAuditTrail, retrieveAuditTrail, deleteMessage };
+async function listAllSecrets(teamId: string, channelId: string) {
+    const params = {
+        TableName: 'Message',
+        IndexName: 'ChannelIndex',
+        KeyConditionExpression: 'workspaceId = :t and channelId = :c',
+        ExpressionAttributeValues: { ':t': teamId, ':c': channelId },
+    };
+    const data = await docClient.query(params).promise();
+    const Items = data.Items;
+    return Items as Message[];
+}
+
+export { createSecret, retrieveSecret, createAuditTrail, retrieveAuditTrail, deleteMessage, listAllSecrets };

@@ -4,7 +4,7 @@ export interface Message {
     channelId?: string;
     authorId: string;
     title: string;
-    users: any;
+    users: string[];
     expiry: number;
     onetime: boolean;
     conversation?: any;
@@ -23,4 +23,9 @@ export interface AccessLog {
     userId: string;
     valid: boolean;
     createdAt: string;
+}
+
+// message with message history retrieved decode key during vault command only
+export interface combinedMHType extends Message {
+    decodeKey: string;
 }
