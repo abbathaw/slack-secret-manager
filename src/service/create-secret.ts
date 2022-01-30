@@ -1,11 +1,6 @@
 import { SlackCommandMiddlewareArgs } from '@slack/bolt/dist/types/command';
 import { AllMiddlewareArgs } from '@slack/bolt/dist/types/middleware';
-
-interface DefaultSettingType {
-    title: string;
-    expiry: number;
-    oneTime: boolean;
-}
+import { DefaultSettingType } from '../models';
 
 const getSecretWithoutModal = (
     context: SlackCommandMiddlewareArgs & AllMiddlewareArgs,

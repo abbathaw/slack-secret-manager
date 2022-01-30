@@ -1,7 +1,14 @@
 import { WebClient } from '@slack/web-api/dist/WebClient';
-import { SlackAction, SlackShortcut } from '@slack/bolt';
+import { SlackShortcut } from '@slack/bolt';
 import { SlashCommand } from '@slack/bolt/dist/types/command';
 import { View } from '@slack/types';
+import { DefaultSettingType } from '../models';
+import {
+    checkBoxOptions,
+    expiryOptions,
+    getCheckboxAccessory,
+    getStaticSelectElement,
+} from '../utils/defaultOptionsHelper';
 
 interface CreateSecretModalInterface {
     client: WebClient;
@@ -13,29 +20,35 @@ interface ShortcutCreateSecretModalInterface {
     shortcut: SlackShortcut;
 }
 
-const showCreateSecretModalShorctut = async ({ shortcut, client }: ShortcutCreateSecretModalInterface) => {
+const showCreateSecretModalShorctut = async (
+    { shortcut, client }: ShortcutCreateSecretModalInterface,
+    defaultSettings: DefaultSettingType,
+) => {
     const result = await client.views.open({
         // Pass a valid trigger_id within 3 seconds of receiving it
         trigger_id: shortcut.trigger_id,
         // View payload
-        view: getViewModal(),
+        view: getViewModal(defaultSettings),
     });
     return result;
 };
 
-const showCreateSecretModal = async ({ command, client }: CreateSecretModalInterface) => {
+const showCreateSecretModal = async (
+    { command, client }: CreateSecretModalInterface,
+    defaultSettings: DefaultSettingType,
+) => {
     const channelId = command.channel_id;
     const responseUrl = command.response_url;
     const result = await client.views.open({
         // Pass a valid trigger_id within 3 seconds of receiving it
         trigger_id: command.trigger_id,
         // View payload
-        view: getViewModal(channelId, responseUrl),
+        view: getViewModal(defaultSettings, channelId, responseUrl),
     });
     return result;
 };
 
-const getViewModal = (channelId?: string, responseUrl?: string): View => {
+const getViewModal = (defaultSettings: DefaultSettingType, channelId?: string, responseUrl?: string): View => {
     return {
         type: 'modal',
         // View identifier
@@ -55,6 +68,7 @@ const getViewModal = (channelId?: string, responseUrl?: string): View => {
                 element: {
                     type: 'plain_text_input',
                     action_id: 'action-title',
+                    initial_value: `${defaultSettings.title}`,
                 },
                 label: {
                     type: 'plain_text',
@@ -99,45 +113,8 @@ const getViewModal = (channelId?: string, responseUrl?: string): View => {
             },
             {
                 type: 'input',
-                optional: true,
-                element: {
-                    type: 'static_select',
-                    options: [
-                        {
-                            text: {
-                                type: 'plain_text',
-                                text: '1 hour',
-                                emoji: true,
-                            },
-                            value: '3600',
-                        },
-                        {
-                            text: {
-                                type: 'plain_text',
-                                text: '1 day',
-                                emoji: true,
-                            },
-                            value: '86400',
-                        },
-                        {
-                            text: {
-                                type: 'plain_text',
-                                text: '1 week',
-                                emoji: true,
-                            },
-                            value: '604800',
-                        },
-                        {
-                            text: {
-                                type: 'plain_text',
-                                text: 'Forever',
-                                emoji: true,
-                            },
-                            value: '0',
-                        },
-                    ],
-                    action_id: 'action-expiry',
-                },
+                optional: false,
+                element: getStaticSelectElement(expiryOptions, defaultSettings),
                 label: {
                     type: 'plain_text',
                     text: 'Expiry Option',
@@ -165,19 +142,7 @@ const getViewModal = (channelId?: string, responseUrl?: string): View => {
                     type: 'mrkdwn',
                     text: ' ',
                 },
-                accessory: {
-                    type: 'checkboxes',
-                    options: [
-                        {
-                            text: {
-                                type: 'mrkdwn',
-                                text: 'One-time visible',
-                            },
-                            value: 'one-time',
-                        },
-                    ],
-                    action_id: 'action-visible',
-                },
+                accessory: getCheckboxAccessory(checkBoxOptions, defaultSettings),
             },
         ],
         submit: {

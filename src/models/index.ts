@@ -37,3 +37,9 @@ export interface UserSettings {
 export interface combinedMHType extends Message {
     decodeKey: string;
 }
+
+export interface DefaultSettingType {
+    title: string;
+    expiry: number;
+    oneTime: boolean;
+}

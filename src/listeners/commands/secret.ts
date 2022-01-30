@@ -14,14 +14,13 @@ const register = (app: App) => {
         // Acknowledge command request
         await ack();
         try {
-            if (command.text === '') await showCreateSecretModal(context);
+            const author = command.user_id;
+            const userSettings = await getUserSettings(command.team_id, author);
+            const defaultSettings = parseDefaultSettings(userSettings);
+            if (command.text === '') await showCreateSecretModal(context, defaultSettings);
             else {
-                const author = command.user_id;
-                const userSettings = await getUserSettings(command.team_id, author);
-                const defaultSettings = parseDefaultSettings(userSettings);
-
                 const decodeKey = encryptionService.generateRandomKey();
-                const value = await getSecretWithoutModal(context, defaultSettings);
+                const value = getSecretWithoutModal(context, defaultSettings);
 
                 if (value.isValid) {
                     const author = command.user_name;
