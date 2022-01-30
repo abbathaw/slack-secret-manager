@@ -14,10 +14,8 @@ const register = (app: App) => {
             const authorId = body['user']['id'];
             const value = {
                 title: utils.getStateValue(modalValue, 'settings-title') as string,
-                expiry: getExpiry(utils.getStateValue(modalValue, 'settings-action-expiry') as ViewStateSelectedOption),
-                onetime: getIfOneTime(
-                    utils.getStateValue(modalValue, 'settings-action-visible') as ViewStateSelectedOption[],
-                ),
+                expiry: getExpiry(utils.getStateValue(modalValue, 'action-expiry') as ViewStateSelectedOption),
+                onetime: getIfOneTime(utils.getStateValue(modalValue, 'action-visible') as ViewStateSelectedOption[]),
             };
             await saveUserSettings({
                 workspaceId: payload.team_id,

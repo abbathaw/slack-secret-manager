@@ -2,7 +2,7 @@ import { DynamoDB } from 'aws-sdk';
 
 const dynamoDB = new DynamoDB({
     region: 'us-west-2',
-    endpoint: 'http://localhost:8000',
+    // endpoint: 'http://localhost:8000',
 });
 
 const backoffInterval = 2000; // 2 seconds

@@ -51,7 +51,7 @@ export const getStaticSelectElement = (options: PlainTextOption[], userSettings:
     const element: StaticSelect = {
         type: 'static_select',
         options: options,
-        action_id: 'settings-action-expiry',
+        action_id: 'action-expiry',
     };
 
     element['initial_option'] = options.filter((o) => Number(o.value) === userSettings.expiry)[0] as PlainTextOption;
@@ -63,7 +63,7 @@ export const getCheckboxAccessory = (options: MrkdwnOption[], userSettings: Defa
     const accessory: Checkboxes = {
         type: 'checkboxes',
         options: checkBoxOptions,
-        action_id: 'settings-action-visible',
+        action_id: 'action-visible',
     };
     if (userSettings.oneTime) {
         accessory['initial_options'] = options;

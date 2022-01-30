@@ -1,7 +1,7 @@
 import { App, LogLevel } from '@slack/bolt';
 
 import './utils/env';
-import registerListeners from "./listeners";
+import registerListeners from './listeners';
 
 export const app = new App({
     token: process.env.SLACK_BOT_TOKEN,
@@ -9,11 +9,10 @@ export const app = new App({
     logLevel: LogLevel.INFO,
     socketMode: true,
     appToken: process.env.SLACK_APP_TOKEN,
-    port: 3000
+    port: 3000,
 });
 
 registerListeners(app);
-
 
 (async () => {
     // Start your app
