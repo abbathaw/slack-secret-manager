@@ -5,6 +5,8 @@ import { getSecretWithoutModal } from '../../service/create-secret';
 import * as encryptionService from '../../service/encryption-service';
 import * as storeService from '../../service/store-service';
 import { displaySecretModal } from '../../component/display-secret-message';
+import { getUserSettings } from '../../service/store-service';
+import { parseDefaultSettings } from '../../utils';
 
 const register = (app: App) => {
     app.command('/secret', async (context) => {
@@ -14,8 +16,12 @@ const register = (app: App) => {
         try {
             if (command.text === '') await showCreateSecretModal(context);
             else {
+                const author = command.user_id;
+                const userSettings = await getUserSettings(command.team_id, author);
+                const defaultSettings = parseDefaultSettings(userSettings);
+
                 const decodeKey = encryptionService.generateRandomKey();
-                const value = await getSecretWithoutModal(context);
+                const value = await getSecretWithoutModal(context, defaultSettings);
 
                 if (value.isValid) {
                     const author = command.user_name;
@@ -48,7 +54,6 @@ const register = (app: App) => {
                     });
                 }
             }
-            logger.info('secret command:', pick(command, ['response_url', 'trigger_id']));
         } catch (error) {
             logger.error(error);
         }

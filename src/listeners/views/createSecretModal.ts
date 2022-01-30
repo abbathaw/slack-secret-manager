@@ -20,9 +20,7 @@ const register = (app: App) => {
     app.view('modal-create-secret', async (context) => {
         const { ack, payload, body, view, client, logger } = context;
         const modalValue = payload.state.values;
-        logger.info('create.private_metadata:', JSON.parse(body.view.private_metadata));
 
-        logger.info('create.values:', JSON.stringify(modalValue));
         await ack();
 
         try {

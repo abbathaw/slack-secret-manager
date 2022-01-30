@@ -25,6 +25,14 @@ export interface AccessLog {
     createdAt: string;
 }
 
+export interface UserSettings {
+    workspaceId: string;
+    userId: string;
+    defaultTitle: string;
+    defaultExpiry: number;
+    defaultOneTime: boolean;
+}
+
 // message with message history retrieved decode key during vault command only
 export interface combinedMHType extends Message {
     decodeKey: string;

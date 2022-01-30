@@ -91,6 +91,12 @@ const register = (app: App) => {
                     text: `Please add Secret Manager App to this channel, so it can fetch this channel's vault.`,
                     replace_original: false,
                 });
+            } else if (e?.data?.error === 'channel_not_found') {
+                await respond({
+                    response_type: 'ephemeral',
+                    text: `Vault command only works within channels, not private conversations.`,
+                    replace_original: false,
+                });
             } else {
                 await respond({
                     response_type: 'ephemeral',

@@ -11,8 +11,6 @@ const register = (app: App) => {
 
         // Acknowledge the action
         await ack();
-        // @ts-ignore
-        logger.info('reveal.value:', body.actions[0].value);
 
         const userId = body.user.id;
         const workplaceId = body.user.team_id || '';
@@ -29,7 +27,7 @@ const register = (app: App) => {
             const secret = store.secret;
             const message = store.message;
 
-            if (!secret) throw new Error('Secret has been removed');
+            if (!secret) throw new Error('Secret has expired and permanently deleted.');
             if (!message) throw new Error('Secret has been deleted');
 
             // check if user is allow to view secret

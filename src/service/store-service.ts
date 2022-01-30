@@ -1,4 +1,4 @@
-import { AccessLog, Message, Secret } from '../models';
+import { AccessLog, Message, Secret, UserSettings } from '../models';
 import { calculateTTL } from '../utils';
 
 const { v4: uuidv4 } = require('uuid');
@@ -164,4 +164,41 @@ async function listAllSecrets(teamId: string, channelId: string) {
     return Items as Message[];
 }
 
-export { createSecret, retrieveSecret, createAuditTrail, retrieveAuditTrail, deleteMessage, listAllSecrets };
+async function saveUserSettings({ workspaceId, userId, defaultExpiry, defaultOneTime, defaultTitle }: UserSettings) {
+    const userSettingItem: UserSettings = {
+        workspaceId,
+        userId,
+        defaultExpiry,
+        defaultOneTime,
+        defaultTitle,
+    };
+
+    await docClient
+        .put({
+            TableName: 'UserSettings',
+            Item: userSettingItem,
+        })
+        .promise();
+    return {};
+}
+
+async function getUserSettings(workspaceId: string, userId: string) {
+    const settings = await docClient
+        .get({
+            TableName: 'UserSettings',
+            Key: { workspaceId, userId },
+        })
+        .promise();
+    return settings && settings.Item ? (settings.Item as UserSettings) : undefined;
+}
+
+export {
+    createSecret,
+    retrieveSecret,
+    createAuditTrail,
+    retrieveAuditTrail,
+    deleteMessage,
+    listAllSecrets,
+    saveUserSettings,
+    getUserSettings,
+};

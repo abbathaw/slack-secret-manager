@@ -1,5 +1,5 @@
 import { ViewStateSelectedOption, ViewStateValue } from '@slack/bolt/dist/types/view';
-import { Message } from './models';
+import { Message, UserSettings } from './models';
 
 const findKey = require('lodash.findkey');
 
@@ -68,4 +68,12 @@ const calculateTTL = (expiry: number) => {
     return Math.floor(timestamp / 1000);
 };
 
-export { getStateValue, isValidUser, isValidExpiry, getExpiry, getIfOneTime, calculateTTL };
+const parseDefaultSettings = (userSettings?: UserSettings | undefined) => {
+    return {
+        title: userSettings?.defaultTitle || 'Instant Secret',
+        expiry: userSettings && userSettings.defaultExpiry !== undefined ? userSettings.defaultExpiry : 3600,
+        oneTime: userSettings?.defaultOneTime || false,
+    };
+};
+
+export { getStateValue, isValidUser, isValidExpiry, getExpiry, getIfOneTime, calculateTTL, parseDefaultSettings };

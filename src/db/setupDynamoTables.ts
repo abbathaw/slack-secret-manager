@@ -108,10 +108,24 @@ const MessageTableParam: DynamoDB.CreateTableInput = {
     BillingMode: 'PAY_PER_REQUEST',
 };
 
+const UserSettingsTableParam: DynamoDB.CreateTableInput = {
+    TableName: '',
+    KeySchema: [
+        { AttributeName: 'workspaceId', KeyType: 'HASH' },
+        { AttributeName: 'userId', KeyType: 'RANGE' },
+    ],
+    AttributeDefinitions: [
+        { AttributeName: 'workspaceId', AttributeType: 'S' },
+        { AttributeName: 'userId', AttributeType: 'S' },
+    ],
+    BillingMode: 'PAY_PER_REQUEST',
+};
+
 const tables = [
     { name: 'Message', params: MessageTableParam },
     { name: 'Secret', params: SecretTableParam },
     { name: 'Access', params: AccessLogTableParam },
+    { name: 'UserSettings', params: UserSettingsTableParam },
 ];
 
 const createTablesIfNotExist = async () => {

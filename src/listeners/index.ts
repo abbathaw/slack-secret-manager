@@ -7,6 +7,7 @@ import * as revealButtonAction from './actions/revealButtonAction';
 import * as handleSecretShortcut from './shortcuts/handleSecretShortcut';
 import * as appHomeOpen from './views/appHomeOpen';
 import * as appHomeSettingAction from './actions/appHomeSettingAction';
+import * as appHomeSettingSaveAction from './views/saveSettingsFromModal';
 
 const registerListeners = (app: App) => {
     secretCommand.register(app);
@@ -17,6 +18,8 @@ const registerListeners = (app: App) => {
     appHomeOpen.register(app);
     appHomeSettingAction.register(app);
     handleSecretShortcut.register(app);
+    handleSecretShortcut.register(app);
+    appHomeSettingSaveAction.register(app);
 };
 
 export default registerListeners;
