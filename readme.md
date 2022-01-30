@@ -1,5 +1,27 @@
 # Slack Secret Manager
 
+Create and share secrets (e.g. passwords, confidential text) to other Slack users in a private message or within channels and get ultimate confidence that only the correct users see the secret.
+
+Features
+===============
+
+- `/secret` command to open a modal dialog which lets you create a new secret. Configure a title, the channel, authorized users, expiry of access, and whether this should expire after first view.
+- `/secret @user <secretMessage>` Lets you create a secret instantly to one user within that conversation/channel.
+- `/vault` Lets you view non-expired secrets that you are authorised to view.
+- "Create a Secret" shortcut also shows the modal dialog to create a new secret.
+- After creating any secret, a secret would have **two buttons**. 
+  - `Reveal Secret` would show a popup to reveal the secret message. 
+  - `Access Log` would show a popup with all users who opened the secret and who got access or were denied.
+- You can also configure the default settings for expiry, title and one-time view in the App Home page.
+
+Security
+===============
+- All secrets are encrypted using OpenPGP standard and are stored as encrypted values in the app's database.
+- Every secret is encrypted with a random decode key.
+- The decode key is never stored in the app itself but stored as a value within the `Reveal Secret` block button that is sent in the conversation message by the app bot.
+- When a user reveals a secret, authorization is checked first before the decode key taken will be used to decode any secret
+- All secrets that have expired be automatically deleted by their `time-to-live` attribute in AWS DynamoDb.
+
 Getting Started
 ===============
 - `npm install` the needed npm packages.
@@ -50,7 +72,6 @@ Your Project
 
 - `app.js` contains the primary Bolt app. It imports the Bolt package (`@slack/bolt`) and starts the Bolt app's server. It's where you'll add your app's listeners.
 - `.env` is where you'll put your Slack app's authorization token and signing secret.
-- The `examples/` folder contains a couple of other sample apps that you can peruse to your liking. They show off a few platform features that your app may want to use.
 
 
 Read the [Getting Started guide](https://api.slack.com/start/building/bolt)
