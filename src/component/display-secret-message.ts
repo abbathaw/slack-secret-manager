@@ -9,14 +9,10 @@ interface DisplaySecretModalInterface {
 }
 
 const displaySecretModal = async ({ store, decodeKey, title, responseUrl, author }: DisplaySecretModalInterface) => {
-    console.log('WHAT IS THE responseUrl', responseUrl);
-
     const result = await axios.post(responseUrl, {
         response_type: 'in_channel',
         blocks: getBlocks(decodeKey, store, title, author),
     });
-
-    console.log('SENT SECRET MODAL', result.data);
 
     return result;
 };
