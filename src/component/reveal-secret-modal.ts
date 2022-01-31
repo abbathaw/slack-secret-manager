@@ -25,7 +25,7 @@ const revealSecretModal = async ({ client, body, store, messageContent }: Reveal
             type: 'modal',
             title: {
                 type: 'plain_text',
-                text: 'Secret Title',
+                text: message?.title || 'Shared Secret',
                 emoji: true,
             },
             close: {

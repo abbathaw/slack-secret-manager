@@ -31,7 +31,8 @@ const register = (app: App) => {
             if (!message) throw new Error('Secret has been deleted');
 
             // check if user is allow to view secret
-            if (!utils.isValidUser(message, userId)) throw new Error('Do not have permission to view secret');
+            if (!utils.isValidUser(message, userId))
+                throw new Error('Oops, you do not have permission to view this secret');
 
             // check if secret has expired
             if (!utils.isValidExpiry(message.expiry)) throw new Error('Secret has expired');

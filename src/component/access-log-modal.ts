@@ -1,5 +1,5 @@
-import {WebClient} from "@slack/web-api/dist/WebClient";
-import {SlackAction} from "@slack/bolt";
+import { WebClient } from '@slack/web-api/dist/WebClient';
+import { SlackAction } from '@slack/bolt';
 
 interface AccessLogModalInterface {
     accessLogs: any;
@@ -18,12 +18,12 @@ const showAccessLogModal = async ({ accessLogs, client, body }: AccessLogModalIn
             title: {
                 type: 'plain_text',
                 text: 'Access Log',
-                emoji: true
+                emoji: true,
             },
             close: {
                 type: 'plain_text',
                 text: 'Close',
-                emoji: true
+                emoji: true,
             },
             blocks: [
                 {
@@ -31,30 +31,32 @@ const showAccessLogModal = async ({ accessLogs, client, body }: AccessLogModalIn
                     fields: [
                         {
                             type: 'mrkdwn',
-                            text: '*Access timestamp*'
+                            text: '*Access timestamp*',
                         },
                         {
                             type: 'mrkdwn',
-                            text: '*By*'
-                        }
-                    ]
-                }
-            ].concat(accessLogs.map((accessLog: any) => ({
-                type: 'section',
-                fields: [
-                    {
-                        type: 'plain_text',
-                        text: accessLog.createdAt.toLocaleString(),
-                    },
-                    {
-                        type: 'mrkdwn',
-                        text: `<@${accessLog.userId}> - ${accessLog.valid ? 'Granted' : 'Deny'}`
-                    }
-                ]
-            })))
-        }
+                            text: '*By*',
+                        },
+                    ],
+                },
+            ].concat(
+                accessLogs.map((accessLog: any) => ({
+                    type: 'section',
+                    fields: [
+                        {
+                            type: 'plain_text',
+                            text: new Date(accessLog.createdAt).toLocaleString(),
+                        },
+                        {
+                            type: 'mrkdwn',
+                            text: `<@${accessLog.userId}> - ${accessLog.valid ? 'Granted' : 'Deny'}`,
+                        },
+                    ],
+                })),
+            ),
+        },
     });
     return result;
-}
+};
 
-export {showAccessLogModal}
+export { showAccessLogModal };
