@@ -14,7 +14,7 @@ export interface Message {
 export interface Secret {
     uuid: string;
     encrypted: string;
-    ttl: string;
+    ttl: number;
 }
 
 export interface AccessLog {

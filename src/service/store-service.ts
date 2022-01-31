@@ -57,7 +57,7 @@ async function createSecret({
         const secretItem: Secret = {
             uuid,
             encrypted,
-            ttl: expiryEpoch.toString(),
+            ttl: expiryEpoch,
         };
 
         await docClient
