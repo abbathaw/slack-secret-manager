@@ -9,7 +9,7 @@ export const app = new App({
     logLevel: LogLevel.INFO,
     socketMode: true,
     appToken: process.env.SLACK_APP_TOKEN,
-    port: 3000,
+    port: (Number(process.env.PORT) || 3000),
 });
 
 registerListeners(app);
