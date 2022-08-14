@@ -10,6 +10,16 @@ export const app = new App({
     socketMode: true,
     appToken: process.env.SLACK_APP_TOKEN,
     port: (Number(process.env.PORT) || 3000),
+    customRoutes: [
+        {
+            path: '/',
+            method: ['GET'],
+            handler: (req, res) => {
+                res.writeHead(200);
+                res.end('Health check!');
+            },
+        },
+    ],
 });
 
 registerListeners(app);
