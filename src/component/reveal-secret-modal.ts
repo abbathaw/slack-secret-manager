@@ -1,6 +1,5 @@
 import { WebClient } from '@slack/web-api/dist/WebClient';
 import { SecretRetrievedType } from '../service/store-service';
-import { Message } from '../models';
 
 interface RevealSecretModalInterface {
     client: WebClient;
