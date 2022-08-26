@@ -26,6 +26,14 @@ async function loadSecretsAndApp() {
                     res.end('Health check!');
                 },
             },
+            {
+                path: '/_ah/warmup',
+                method: ['GET'],
+                handler: (req, res) => {
+                    res.writeHead(200);
+                    res.end('Warmup done!');
+                },
+            },
         ],
     });
     registerListeners(app);

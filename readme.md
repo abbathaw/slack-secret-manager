@@ -25,6 +25,7 @@ Security
 Getting Started
 ===============
 - `npm install` the needed npm packages.
+- Create the app and install it on your slack workspace from [here](https://api.slack.com/apps/) (use the manifest)
 - copy and rename `.env.sample` to `.env`.
 - Obtain the ENVIRONMENT variable using this [guide](https://slack.dev/bolt-js/tutorial/getting-started).
     + Go to the Slack App page.
