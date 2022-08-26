@@ -1,0 +1,12 @@
+indexes:
+
+- kind: Access
+  properties:
+    - name: secretUuid
+    - name: createdAt
+
+- kind: Message
+  properties:
+    - name: workspaceId
+    - name: channelId
+    - name: createdAt

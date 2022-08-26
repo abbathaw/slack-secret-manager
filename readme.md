@@ -47,8 +47,11 @@ Things to know about deploying
 =====================
 - This branch is set to use GCP database. For AWS, use the main branch which uses dynamodb.
 - You need to setup a GCP project and use `Cloud Firestore in Datastore mode`. You will need to enable Datastore API in your project.
-- This app is intended to be dockerized and run on Cloud run. You can also run this on App engine if you want.
+- This app is intended to be on App engine. See `app.yaml` for configuration. You can run `npm run app-deploy`.
+- You will also need to deploy the indexes to datastore. You must either specifically list index.yaml as an argument to gcloud app deploy e.g. `gcloud app deploy index.yaml
+`  or run `gcloud datastore indexes create` to deploy the index configuration file.
 - While developing you can use the local datastore emulator setup to run the app locally (see below).
+- This app is configured to have the SLACK secret/accessAPI/BotToken stored and accessed from Google Secret Manager. 
 
 ***Important: after deploying to real datastore***
 - Enable time-to-live on datastore db [Read More](https://cloud.google.com/datastore/docs/ttl)
