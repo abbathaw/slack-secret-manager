@@ -20,14 +20,16 @@ Security
 - Every secret is encrypted with a random decode key.
 - The decode key is never stored in the app itself but stored as a value within the `Reveal Secret` block button that is sent in the conversation message by the app bot.
 - When a user reveals a secret, authorization is checked first before the decode key taken will be used to decode any secret
-- All secrets that have expired be automatically deleted by their `time-to-live` attribute in AWS DynamoDb.
+- All secrets that have expired be automatically deleted by their `time-to-live` attribute in datastore (it has to be defined as a ttl policy upon deployment)
 
 Getting Started
 ===============
 - `npm install` the needed npm packages.
+- Create the app and install it on your slack workspace from [here](https://api.slack.com/apps/) (use the manifest)
 - copy and rename `.env.sample` to `.env`.
 - Obtain the ENVIRONMENT variable using this [guide](https://slack.dev/bolt-js/tutorial/getting-started).
     + Go to the Slack App page.
+    + When you start on the Slack app page, you can import the `manifest.yaml` file in this repository to have the majority of setup ready.
     + **OAuth & Permissions** to get the *Bot User OAuth Token*
     + **Basic Information** to get the *Signing Secret*
     + *Slack App Token* - this is retrieved when you enable socket mode or from the home config.
@@ -42,23 +44,29 @@ Getting Started
 - If everything works well, type `/secret` in the slack chat.
     + It should have a pop up model.
 
-Local DynamoDB Setup
+Things to know about deploying
+=====================
+- This branch is set to use GCP database. For AWS, use the main branch which uses dynamodb.
+- You need to setup a GCP project and use `Cloud Firestore in Datastore mode`. You will need to enable Datastore API in your project.
+- This app is intended to be on App engine. See `app.yaml` for configuration. You can run `npm run app-deploy`.
+- You will also need to deploy the indexes to datastore. You must either specifically list index.yaml as an argument to gcloud app deploy e.g. `gcloud app deploy index.yaml
+`  or run `gcloud datastore indexes create` to deploy the index configuration file.
+- While developing you can use the local datastore emulator setup to run the app locally (see below).
+- This app is configured to have the SLACK secret/accessAPI/BotToken stored and accessed from Google Secret Manager. 
+
+***Important: after deploying to real datastore***
+- Enable time-to-live on datastore db [Read More](https://cloud.google.com/datastore/docs/ttl)
+
+
+Local Datastore emulator Setup
 ====================
-- Setup the local dynamodb using `:8000` using the following [guide](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html)
-- Ensure that you have the *Access Key* available in
-    - Environment variable for `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`
-    - Or, `AWS_CONFIG`.
+- Setup the local firestore emulator using using the following [guide](https://cloud.google.com/datastore/docs/tools/datastore-emulator)
 
-- Run local dynamodb
+- Run local emulator
   ```bash
-  docker run -itd -p 8000:8000  --name dev-db amazon/dynamodb-local:latest -jar DynamoDBLocal.jar -sharedDb
+  gcloud beta emulators datastore start --data-dir ./datastore_local/   
   ```
-- Run `npm run db` to init create the tables.
 
-- Enable time-to-live on local db
-  ```bash
-  aws dynamodb update-time-to-live --table-name Secret --time-to-live-specification Enabled=true,AttributeName=ttl --endpoint-url http://localhost:8000 --region=sas
-  ```
 
 Bolt app template
 =================

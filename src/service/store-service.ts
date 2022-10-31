@@ -2,18 +2,11 @@ import { AccessLog, Message, Secret, UserSettings } from '../models';
 import { calculateTTL } from '../utils';
 
 const { v4: uuidv4 } = require('uuid');
-const AWS = require('aws-sdk');
-AWS.config.update({
-    region: 'us-west-2',
-});
 
-if (process.env.local) {
-    AWS.config.update({
-        endpoint: 'http://localhost:8000',
-    });
-}
+const {Datastore} = require('@google-cloud/datastore');
 
-const docClient = new AWS.DynamoDB.DocumentClient();
+const datastore = new Datastore();
+
 
 interface ICreateSecret {
     workspaceId: string;
@@ -60,19 +53,17 @@ async function createSecret({
             ttl: expiryEpoch,
         };
 
-        await docClient
-            .put({
-                TableName: 'Secret',
-                Item: secretItem,
-            })
-            .promise();
+        await datastore
+            .save({
+                key: datastore.key(['Secret', uuid]),
+                data: secretItem,
+            });
 
-        await docClient
-            .put({
-                TableName: 'Message',
-                Item: messageItem,
-            })
-            .promise();
+        await datastore
+            .save({
+                key: datastore.key(['Workspace', workspaceId, 'Message', uuid]),
+                data: messageItem,
+            });
         return { uuid };
     } catch (err) {
         console.error(err);
@@ -87,26 +78,16 @@ export type SecretRetrievedType = {
 };
 
 async function retrieveSecret(uuid: string, workspaceId: string): Promise<SecretRetrievedType> {
-    const secret = await docClient
-        .get({
-            TableName: 'Secret',
-            Key: { uuid },
-        })
-        .promise();
+    const secretKey = datastore.key(['Secret', uuid])
+    const [secret] = await datastore.get(secretKey);
 
-    const message = await docClient
-        .get({
-            TableName: 'Message',
-            Key: { uuid, workspaceId },
-        })
-        .promise();
-
+    const messageKey = datastore.key(['Workspace', workspaceId, 'Message', uuid])
+    const [message] = await datastore.get(messageKey);
     const results: SecretRetrievedType = {
-        createdAt: new Date(message.Item?.createdAt),
-        secret: (secret && secret.Item) || undefined,
-        message: (secret && message.Item) || undefined,
+        createdAt: new Date(message?.createdAt),
+        secret: (secret) || undefined,
+        message: (message) || undefined,
     };
-
     return results;
 }
 
@@ -127,47 +108,31 @@ async function createAuditTrail({ uuid: secretUuid, userId, valid = true }: ICre
         createdAt: new Date().toISOString(),
     };
 
-    await docClient
-        .put({
-            TableName: 'Access',
-            Item: auditItem,
-        })
-        .promise();
+    await datastore
+        .save({
+            key: datastore.key('Access'),
+            data: auditItem,
+        });
     return {};
 }
 
 async function retrieveAuditTrail(uuid: string) {
-    const params = {
-        TableName: 'Access',
-        IndexName: 'secretIdIndex',
-        KeyConditionExpression: 'secretUuid = :s',
-        ExpressionAttributeValues: { ':s': uuid },
-    };
-    const data = await docClient.query(params).promise();
-    const Items = data.Items;
-    return Items as AccessLog[];
+    const query = await datastore.createQuery('Access')
+        .filter('secretUuid', '=', uuid).order('createdAt');
+    const [accessLogs] = await datastore.runQuery(query);
+    return accessLogs as AccessLog[];
 }
 
 async function deleteMessage(uuid: string) {
-    const params = {
-        TableName: 'Secret',
-        Key: {
-            uuid: uuid,
-        },
-    };
-    return await docClient.delete(params).promise();
+    return await datastore.delete(datastore.key(['Secret', uuid]));
 }
 
 async function listAllSecrets(teamId: string, channelId: string) {
-    const params = {
-        TableName: 'Message',
-        IndexName: 'ChannelIndex',
-        KeyConditionExpression: 'workspaceId = :t and channelId = :c',
-        ExpressionAttributeValues: { ':t': teamId, ':c': channelId },
-    };
-    const data = await docClient.query(params).promise();
-    const Items = data.Items;
-    return Items as Message[];
+    const query = datastore.createQuery('Message')
+        .filter('workspaceId', '=', teamId)
+        .filter('channelId', '=', channelId).order('createdAt');
+    const [messages] =  await datastore.runQuery(query);
+    return messages as Message[];
 }
 
 async function saveUserSettings({ workspaceId, userId, defaultExpiry, defaultOneTime, defaultTitle }: UserSettings) {
@@ -179,23 +144,18 @@ async function saveUserSettings({ workspaceId, userId, defaultExpiry, defaultOne
         defaultTitle,
     };
 
-    await docClient
-        .put({
-            TableName: 'UserSettings',
-            Item: userSettingItem,
-        })
-        .promise();
+    await datastore
+        .save({
+            key: datastore.key(['UserSettings', userId, 'Workspace', workspaceId]),
+            data: userSettingItem,
+        });
     return {};
 }
 
 async function getUserSettings(workspaceId: string, userId: string) {
-    const settings = await docClient
-        .get({
-            TableName: 'UserSettings',
-            Key: { workspaceId, userId },
-        })
-        .promise();
-    return settings && settings.Item ? (settings.Item as UserSettings) : undefined;
+    const settingsKey = datastore.key(['UserSettings', userId, 'Workspace', workspaceId])
+    const [settings] = await datastore.get(settingsKey);
+    return settings ? (settings as UserSettings) : undefined;
 }
 
 export {

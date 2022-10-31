@@ -1,0 +1,16 @@
+runtime: nodejs16
+env: standard
+instance_class: F1
+automatic_scaling:
+  min_instances: 1
+  min_idle_instances: 1
+
+inbound_services:
+  - warmup
+
+env_variables:
+  SECRET_PREFIX: "BUX_"
+  SLACK_BOT_TOKEN: "SLACK_BOT_TOKEN"
+  SLACK_SIGNING_SECRET: "SLACK_SIGNING_SECRET"
+  SLACK_APP_TOKEN: "SLACK_APP_TOKEN"
+  LOAD_SECRET_MANAGER: 'true'
